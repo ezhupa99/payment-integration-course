@@ -1,0 +1,28 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "type": "bun",
+      "request": "launch",
+      "name": "Launch Bun Backend",
+      "program": "${workspaceFolder}/backend/src/index.ts",
+      "cwd": "${workspaceFolder}/backend",
+      "runtimeArgs": [
+        "--env-file",
+        "${workspaceFolder}/backend/.env"
+      ]
+    },
+    {
+      "type": "bun",
+      "request": "launch",
+      "name": "Launch Bun Backend (Watch Mode)",
+      "program": "${workspaceFolder}/backend/src/index.ts",
+      "cwd": "${workspaceFolder}/backend",
+      "watchMode": true,
+      "runtimeArgs": [
+        "--env-file",
+        "${workspaceFolder}/.env"
+      ]
+    }
+  ]
+}

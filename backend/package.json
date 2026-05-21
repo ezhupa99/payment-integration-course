@@ -1,0 +1,18 @@
+{
+    "name": "pokpay-backend",
+    "version": "1.0.0",
+    "type": "module",
+    "scripts": {
+        "dev": "bun run --watch src/index.ts"
+    },
+    "dependencies": {
+        "@nebula-ltd/pok-payments-js": "^1.5.5",
+        "bun-types": "latest"
+    },
+    "devDependencies": {
+        "@types/bun": "latest"
+    },
+    "peerDependencies": {
+        "typescript": "^5"
+    }
+}

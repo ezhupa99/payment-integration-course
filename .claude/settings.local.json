@@ -1,0 +1,13 @@
+{
+  "permissions": {
+    "allow": [
+      "mcp__plugin_chrome-devtools-mcp_chrome-devtools__navigate_page",
+      "mcp__plugin_chrome-devtools-mcp_chrome-devtools__take_screenshot",
+      "Bash(Get-ChildItem -Path \"C:\\\\Users\\\\emanu\\\\source\\\\repos\\\\personal\\\\courses\\\\payment-integration-pok-pay-cdn\" -Recurse -Depth 2)",
+      "Bash(Select-Object FullName, PSIsContainer)",
+      "Bash(Format-Table -AutoSize)",
+      "Bash(Get-ChildItem -Path \"C:\\\\Users\\\\emanu\\\\source\\\\repos\\\\personal\\\\courses\\\\payment-integration-pok-pay-cdn\" -Recurse -Directory)",
+      "Bash(Select-Object -ExpandProperty FullName)"
+    ]
+  }
+}

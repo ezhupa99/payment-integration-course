@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>PokPay Integration Tester</title>
+    <style>
+        body {
+            font-family: sans-serif;
+            padding: 20px;
+            max-width: 800px;
+            margin: auto;
+        }
+
+        .step {
+            margin-bottom: 20px;
+            border: 1px solid #ccc;
+            padding: 15px;
+            position: relative;
+        }
+
+        .step h2 {
+            margin-top: 0;
+        }
+
+        .step.locked {
+            opacity: 0.4;
+            pointer-events: none;
+        }
+
+        .lock-banner {
+            display: none;
+            background: #f5f5f5;
+            border: 1px dashed #aaa;
+            padding: 8px 12px;
+            margin-bottom: 10px;
+            font-size: 0.85em;
+            color: #555;
+        }
+
+        .step.locked .lock-banner {
+            display: block;
+        }
+
+        .step-status {
+            display: inline-block;
+            margin-left: 10px;
+            font-size: 0.8em;
+            padding: 2px 8px;
+            border-radius: 4px;
+            vertical-align: middle;
+        }
+
+        .status-active {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .status-done {
+            background: #cce5ff;
+            color: #004085;
+        }
+
+        .status-locked {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        .form-group {
+            margin-bottom: 10px;
+        }
+
+        .separator {
+            border: none;
+            border-top: 2px dashed #ccc;
+            margin: 30px 0;
+        }
+
+        .guest-section {
+            margin-bottom: 30px;
+            border: 1px solid #ccc;
+            padding: 15px;
+            background: #fafafa;
+        }
+
+        .guest-label {
+            font-size: 0.75em;
+            color: #888;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 6px;
+        }
+
+        #output {
+            background: #eee;
+            padding: 15px;
+            white-space: pre-wrap;
+            margin-top: 20px;
+        }
+
+        .context-info {
+            background: #e8f4e8;
+            border: 1px solid #b2d8b2;
+            padding: 8px 12px;
+            margin-bottom: 10px;
+            font-size: 0.9em;
+            display: none;
+        }
+
+        .field-note {
+            display: block;
+            font-size: 0.8em;
+            color: #666;
+            margin-top: 4px;
+        }
+
+        .checkbox-label {
+            display: block;
+            margin-bottom: 10px;
+            font-size: 0.9em;
+        }
+    </style>
+    <script src="https://static.pokpay.io/public/dist/pokpayments/pok-payment.js"></script>
+</head>
+
+<body>
+    <h1>PokPay Tester — Profile-Based Flow</h1>
+
+    <!-- Step 1: Create User -->
+    <div class="step" id="step-1">
+        <h2>Step 1: Create User <span class="step-status status-active" id="status-1">Active</span></h2>
+        <div class="lock-banner">Complete Step 1 first to unlock this step.</div>
+        <div class="form-group">
+            <input type="text" id="user-name" placeholder="User name (e.g. John Doe)">
+            <button id="create-user-btn">Create User</button>
+        </div>
+        <div class="context-info" id="user-info"></div>
+    </div>
+
+    <!-- Step 2: Save Card -->
+    <div class="step locked" id="step-2">
+        <h2>Step 2: Save Card to Profile <span class="step-status status-locked" id="status-2">Locked</span></h2>
+        <div class="lock-banner">Complete Step 1 first to unlock this step.</div>
+        <div class="context-info" id="step2-user-info"></div>
+        <label class="checkbox-label">
+            <input type="checkbox" id="save-card-consent">
+            Save this card for future payments
+        </label>
+        <div class="form-group">
+            <button id="start-save-card-btn">Mount Save Card Form</button>
+        </div>
+        <div id="pok-add-card"></div>
+    </div>
+
+    <!-- Step 3: Pay with Saved Card -->
+    <div class="step locked" id="step-3">
+        <h2>Step 3: Pay with Saved Card <span class="step-status status-locked" id="status-3">Locked</span></h2>
+        <div class="lock-banner">Complete Step 2 first to unlock this step.</div>
+        <div class="context-info" id="step3-card-info"></div>
+        <div class="form-group">
+            <input type="number" id="ps-amount" value="1000" placeholder="Amount in ALL">
+            <button id="pay-saved-btn">Prepare &amp; Pay</button>
+            <span class="field-note">Currency: ALL</span>
+        </div>
+        <div id="pay-by-token"></div>
+    </div>
+
+    <!-- Step 4: Auth + Delayed Capture -->
+    <div class="step locked" id="step-4">
+        <h2>Step 4: Authorize Now, Capture Later <span class="step-status status-locked" id="status-4">Locked</span></h2>
+        <div class="lock-banner">Complete Step 2 first to unlock this step.</div>
+        <div class="context-info" id="step4-card-info"></div>
+        <div class="form-group">
+            <input type="number" id="ac-amount" value="1000" placeholder="Authorize amount in ALL">
+            <button id="authorize-btn">Authorize payment</button>
+            <span class="field-note">Currency: ALL</span>
+        </div>
+        <div id="auth-3ds-container"></div>
+        <hr style="margin:15px 0;">
+        <div class="form-group">
+            <label style="display:block; font-size:0.85em; color:#555; margin-bottom:4px;">Authorized: waiting for fulfillment confirmation</label>
+            <input type="number" id="ac-capture-amount" value="1000" placeholder="Capture amount in ALL">
+            <input type="text" id="ac-split-merchant" placeholder="Split merchantId (optional)" style="width:280px;">
+            <input type="number" id="ac-split-amount" placeholder="Split amount (optional)" style="width:140px;">
+            <button id="capture-btn" disabled>Confirm fulfillment and capture</button>
+            <span class="field-note">Currency: ALL</span>
+        </div>
+    </div>
+
+    <hr class="separator">
+    <p style="text-align:center; color:#888; font-size:0.85em;">Alternative flow — no user profile required</p>
+
+    <!-- Guest Checkout (separate) -->
+    <div class="guest-section">
+        <div class="guest-label">Guest Checkout</div>
+        <h2 style="margin-top:4px;">Pay Without Saving a Card</h2>
+        <div class="form-group">
+            <input type="number" id="co-amount" value="1000" placeholder="Amount in ALL">
+            <button id="start-checkout-btn">Start Checkout</button>
+            <span class="field-note">Currency: ALL</span>
+        </div>
+        <div id="pok-checkout"></div>
+    </div>
+
+    <h3>Output</h3>
+    <div id="output">Results will appear here...</div>
+
+    <script src="app.js"></script>
+</body>
+
+</html>
